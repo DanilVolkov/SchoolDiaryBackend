@@ -1,10 +1,10 @@
-from pydantic import BaseModel, Field
+from sqlmodel import SQLModel, Field
 
-class SubjectBase(BaseModel):
-    name: str = Field(examples=['Математика'])
+class SubjectBase(SQLModel):
+    name: str = Field(schema_extra={'examples': ['Математика']})
 
 class SubjectUpdate(SubjectBase):
     ...
 
 class SubjectPublic(SubjectBase):
-    id: int = Field(examples=[101])
+    id: int = Field(schema_extra={'examples': [101]})

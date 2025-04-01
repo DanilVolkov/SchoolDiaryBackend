@@ -1,20 +1,20 @@
-from pydantic import BaseModel, Field
+from sqlmodel import SQLModel, Field
 from typing import Optional
 from datetime import date
 
-class UserBase(BaseModel):
-    first_name: str = Field(examples=['Юрий'])
-    last_name: str = Field(examples=['Коршунов'])
-    middle_name: str = Field(examples=['Владимирович'])
-    email: str = Field(examples=['yuraskamaz@mail.com'])
-    birthdate: date = Field(examples=[date(2003, 8, 15)])
+class UserBase(SQLModel):
+    username: str = Field(schema_extra={'examples': ['yuraskamaz']})
+    first_name: str = Field(schema_extra={'examples': ['Юрий']})
+    last_name: str = Field(schema_extra={'examples': ['Коршунов']})
+    middle_name: str = Field(schema_extra={'examples': ['Владимирович']})
+    date_of_birth: date = Field(schema_extra={'examples': [date(2003, 8, 15)]})
 
 class UserUpdate(UserBase):
-    first_name: Optional[str] = Field(None, examples=['Юрий'])
-    last_name: Optional[str] = Field(None, examples=['Коршунов'])
-    middle_name: Optional[str] = Field(None, examples=['Владимирович'])
-    email: Optional[str] = Field(None, examples=['yuraskamaz@mail.com'])
-    birthdate: Optional[date] = Field(None, examples=[date(2003, 8, 15)])
+    username: Optional[str] = Field(None, schema_extra={'examples': ['yuraskamaz']})
+    first_name: Optional[str] = Field(None, schema_extra={'examples': ['Юрий']})
+    last_name: Optional[str] = Field(None, schema_extra={'examples': ['Коршунов']})
+    middle_name: Optional[str] = Field(None, schema_extra={'examples': ['Владимирович']})
+    date_of_birth: Optional[date] = Field(None, schema_extra={'examples': [date(2003, 8, 15)]})
 
 class UserPublic(UserBase):
-    id: int = Field(examples=[101])
+    id: int = Field(schema_extra={'examples': ['101']})

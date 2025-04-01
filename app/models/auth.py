@@ -1,6 +1,6 @@
-from pydantic import BaseModel
+from sqlmodel import SQLModel
 
 # WIP
 
-class Auth(BaseModel):
+class Auth(SQLModel):
     token: str

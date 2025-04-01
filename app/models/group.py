@@ -1,19 +1,19 @@
-from pydantic import BaseModel, Field
+from sqlmodel import SQLModel, Field
 from typing import Optional
 
 from .student import StudentPublic
 from .teacher import TeacherPublic
 
-class GroupBase(BaseModel):
-    name: str = Field(examples=['11А'])
-    teacher: int = Field(examples=[101])
+class GroupBase(SQLModel):
+    name: str = Field(schema_extra={'examples': ['11А']})
+    teacher: int = Field(schema_extra={'examples': [101]})
 
 class GroupUpdate(GroupBase):
-    name: Optional[str] = Field(None, examples=['11А'])
-    teacher: Optional[int] = Field(None, examples=[101])
-    students: Optional[list[int]] = Field(None, examples=[[201, 202, 203]])
+    name: Optional[str] = Field(None, schema_extra={'examples': ['11А']})
+    teacher: Optional[int] = Field(None, schema_extra={'examples': [101]})
+    students: Optional[list[int]] = Field(None, schema_extra={'examples': [[201, 202, 203]]})
 
 class GroupPublic(GroupBase):
-    id: int = Field(examples=[101])
+    id: int = Field(schema_extra={'examples': [101]})
     teacher: TeacherPublic
     students: list[StudentPublic]

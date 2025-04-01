@@ -1,13 +1,13 @@
-from pydantic import Field
+from sqlmodel import Field
 from typing import Optional
 
 from .user import UserBase, UserUpdate
 
 class StudentBase(UserBase):
-    group: str = Field(examples=['11А'])
+    group: str = Field(schema_extra={'examples': ['11A']})
 
 class StudentUpdate(UserUpdate):
-    group: Optional[str] = Field(None, examples=['11А'])
+    group: Optional[str] = Field(None, schema_extra={'examples': ['11A']})
 
 class StudentPublic(StudentBase):
-    id: int = Field(examples=[101])
+    id: int = Field(schema_extra={'examples': [101]})
