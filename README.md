@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# SchoolDairy
-=======
 # School Diary API
 
 API для управления школьным дневником.
@@ -22,4 +19,3 @@ pip install -r requirements.txt
 ```
 uvicorn app.main:app --reload
 ```
->>>>>>> 3a6ec56 (init)
