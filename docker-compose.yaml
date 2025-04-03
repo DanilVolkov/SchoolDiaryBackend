@@ -1,48 +1,49 @@
 version: '3.8'
 
 services:
-  db:
-    image: postgres:15-alpine
-    hostname: db
-    networks:
-      - diary_network
+  postgresql:
+    image: postgres:16
+    container_name: postgresql
+    restart: unless-stopped
     ports:
-      - 5432:5432
+      - "5432:5432"
     environment:
-      POSTGRES_DB: schooldiary
+      POSTGRES_DB: postgres
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 69366936Server
-    healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "postgres" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    restart: always
+      POSTGRES_PASSWORD: postgres
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgresql:/var/lib/postgresql/data
+    networks:
+      - backend
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
+      interval: 3s
+      timeout: 5s
 
   flyway:
     image: flyway/flyway:10-alpine
-    networks:
-      - diary_network
+    container_name: flyway
+    restart: on-failure
     depends_on:
-      db:
+      postgresql:
         condition: service_healthy
     volumes:
-      - E:\Ne ydolyat'\Diary2\SchoolDiaryBackend\app\migrations:/flyway/sql
+      - .\app\migrations:/flyway/sql
+    networks:
+      - backend
     environment:
-      FLYWAY_URL: jdbc:postgresql://db:5432/schooldiary
+      FLYWAY_URL: jdbc:postgresql://postgresql:5432/postgres
       FLYWAY_USER: postgres
-      FLYWAY_PASSWORD: 69366936Server
-      FLYWAY_SCHEMAS: public
+      FLYWAY_PASSWORD: postgres
       FLYWAY_BASELINE_ON_MIGRATE: "true"
+    command: migrate
     healthcheck:
       test: ["CMD", "flyway", "info"]
       interval: 10s
       timeout: 5s
       retries: 5
+
 volumes:
-  pgdata:
+  postgresql: {}
 networks:
-  diary_network:
-    driver: bridge
+  backend: {}
