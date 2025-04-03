@@ -17,3 +17,12 @@ class HomeworkUpdate(HomeworkBase):
 class HomeworkPublic(HomeworkBase):
     id: int = Field(schema_extra={'examples': [101]})
     lesson: LessonPublic
+
+class Homework(SQLModel, table=True):
+    __tablename__ = "homework"
+
+    id: int = Field(primary_key=True)
+    lesson_id: int = Field(foreign_key="lessons.id")
+    teacher_id: int = Field(foreign_key="users.id")
+    desc: str
+    date: date

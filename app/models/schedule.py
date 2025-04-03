@@ -36,3 +36,14 @@ class ScheduleObjectExt(SQLModel):
 class SchedulePublic(SQLModel):
     day_of_week: str = Field(schema_extra={'examples': ['thursday']})
     content: list[ScheduleObjectExt]
+
+class Schedule(SQLModel, table=True):
+    __tablename__ = "schedule"
+
+    id: int = Field(primary_key=True)
+    group_id: int = Field(foreign_key="groups.id")
+    subject_id: int = Field(foreign_key="subjects.id")
+    teacher_id: int = Field(foreign_key="users.id")
+    classroom_id: int = Field(foreign_key="classrooms.id") 
+    day_of_week: int
+    lesson_order: int

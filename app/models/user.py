@@ -18,3 +18,16 @@ class UserUpdate(UserBase):
 
 class UserPublic(UserBase):
     id: int = Field(schema_extra={'examples': ['101']})
+
+class User(SQLModel, table=True):
+    __tablename__ = "users"
+
+    id: int = Field(primary_key=True)
+    username: str
+    password: str
+    first_name: str
+    last_name: str
+    middle_name: str | None = Field(default=None)
+    date_of_birth: date
+    role_id: int = Field(foreign_key="roles.id")
+    group_id: int = Field(foreign_key="groups.id")

@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    hostname: db
+    networks:
+      - diary_network
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: schooldiary
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 69366936Server
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  flyway:
+    image: flyway/flyway:10-alpine
+    networks:
+      - diary_network
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - E:\Ne ydolyat'\Diary2\SchoolDiaryBackend\app\migrations:/flyway/sql
+    environment:
+      FLYWAY_URL: jdbc:postgresql://db:5432/schooldiary
+      FLYWAY_USER: postgres
+      FLYWAY_PASSWORD: 69366936Server
+      FLYWAY_SCHEMAS: public
+      FLYWAY_BASELINE_ON_MIGRATE: "true"
+    healthcheck:
+      test: ["CMD", "flyway", "info"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+volumes:
+  pgdata:
+networks:
+  diary_network:
+    driver: bridge
