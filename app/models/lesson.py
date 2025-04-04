@@ -23,3 +23,16 @@ class LessonPublic(LessonBase):
     id: int = Field(schema_extra={'examples': [101]})
     subject: SubjectPublic
     teacher: TeacherPublic
+
+class Lesson(SQLModel, table=True):
+    __tablename__ = "lessons"
+
+    id: int = Field(primary_key=True)
+    schedule_id: int = Field(foreign_key="schedule.id")
+    group_id: int = Field(foreign_key="groups.id")
+    subject_id: int = Field(foreign_key="subjects.id")
+    teacher_id: int = Field(foreign_key="users.id")
+    classroom_id: int = Field(foreign_key="classrooms.id")
+    lesson_date: date
+    time_start: time
+    time_end: time

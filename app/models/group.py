@@ -17,3 +17,9 @@ class GroupPublic(GroupBase):
     id: int = Field(schema_extra={'examples': [101]})
     teacher: TeacherPublic
     students: list[StudentPublic]
+
+class Group(SQLModel, table=True):
+    __tablename__ = 'groups'
+
+    id: int = Field(primary_key=True)
+    name: str

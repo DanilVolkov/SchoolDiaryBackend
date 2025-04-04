@@ -14,3 +14,12 @@ class MarkUpdate(SQLModel):
 
 class MarkPublic(MarkBase):
     id: int = Field(schema_extra={'examples': [101]})
+
+class Mark(SQLModel, table=True):
+    __tablename__ = "marks"
+
+    id: int = Field(primary_key=True)
+    lesson_id: int = Field(foreign_key="lessons.id")
+    student_id: int = Field(foreign_key="users.id")
+    mark_value_id: int = Field(foreign_key="mark_values.id")
+    date: date

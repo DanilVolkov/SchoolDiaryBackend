@@ -8,3 +8,8 @@ class SubjectUpdate(SubjectBase):
 
 class SubjectPublic(SubjectBase):
     id: int = Field(schema_extra={'examples': [101]})
+
+class Subject(SubjectBase, table=True):
+    __tablename__ = "subjects"
+
+    id: int = Field(primary_key=True)
