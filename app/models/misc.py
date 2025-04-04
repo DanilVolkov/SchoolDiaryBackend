@@ -7,6 +7,9 @@ class ClassroomBase(SQLModel):
 class ClassroomUpdate(ClassroomBase):
     name: Optional[str] = Field(None, schema_extra={"examples": ["404 ауд."]})
 
+class ClassroomPublic(ClassroomBase):
+    id: int = Field(schema_extra={'examples': [101]})
+
 class Classroom(SQLModel, table=True):
     __tablename__ = "classrooms"
 
@@ -19,6 +22,9 @@ class RoleBase(SQLModel):
 class RoleUpdate(RoleBase):
     name: Optional[str] = Field(None, schema_extra={"examples": ["ученик"]})
 
+class RolePublic(RoleBase):
+    id: int = Field(schema_extra={'examples': [101]})
+
 class Role(SQLModel, table=True):
     __tablename__ = "roles"
 
@@ -30,6 +36,9 @@ class MarkValueBase(SQLModel):
 
 class MarkValueUpdate(MarkValueBase):
     value_name: Optional[str] = Field(None, schema_extra={"examples": ["5"]})
+
+class MarkValuePublic(MarkValueBase):
+    id: int = Field(schema_extra={'examples': [101]})
 
 class MarkValue(SQLModel, table=True):
     __tablename__ = "mark_values"
