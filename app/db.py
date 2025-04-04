@@ -1,17 +1,18 @@
 from sqlmodel import create_engine, SQLModel, Session
 import os
 from dotenv import load_dotenv
-from models.misc import MarkValue
-from models.user import User
-from models.group import Group
-from models.subject import Subject
-from models.schedule import Schedule
-from models.homework import Homework
-from models.mark import Mark
-from models.misc import Classroom
-from models.misc import Role
-from models.lesson import Lesson
-import migrations
+
+from app.models.misc import MarkValue
+from app.models.user import User
+from app.models.group import Group
+from app.models.subject import Subject
+from app.models.schedule import Schedule
+from app.models.homework import Homework
+from app.models.mark import Mark
+from app.models.misc import Classroom, Role
+from app.models.lesson import Lesson
+
+from app import migrations
 
 load_dotenv()
 

@@ -1,5 +1,6 @@
 from sqlmodel import SQLModel, Field
 from typing import Optional
+from pydantic import field_validator
 
 from .teacher import TeacherPublic
 from .subject import SubjectPublic
@@ -38,8 +39,23 @@ class ScheduleObjectExt(SQLModel):
     homework: HomeworkBase
 
 class SchedulePublic(SQLModel):
-    day_of_week: str = Field(schema_extra={'examples': ['thursday']})
+    day_of_week: str = Field(schema_extra={'examples': ['Четверг']})
     content: list[ScheduleObjectExt]
+
+    @field_validator('day_of_week', mode='before')
+    @classmethod
+    def validate_dow(cls, value: int):
+        print(value)
+        days = {
+            1: 'Понедельник',
+            2: 'Вторник',
+            3: 'Среда',
+            4: 'Четверг',
+            5: 'Пятница',
+            6: 'Суббота',
+            7: 'Воскресенье'
+        }
+        return days[value]
 
 class Schedule(ScheduleObjectBase, table=True):
     __tablename__ = "schedule"

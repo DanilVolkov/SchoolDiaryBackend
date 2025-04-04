@@ -37,3 +37,6 @@ class Lesson(LessonBase, table=True):
     subject_id: int = Field(foreign_key="subjects.id")
     teacher_id: int = Field(foreign_key="users.id")
     classroom_id: int = Field(foreign_key="classrooms.id")
+
+    subject: 'Subject' = Relationship()
+    teacher: 'User' = Relationship()

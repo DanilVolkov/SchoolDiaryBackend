@@ -19,8 +19,8 @@ class HomeworkUpdate(HomeworkBase):
 
 class HomeworkPublic(HomeworkBase):
     id: int = Field(schema_extra={'examples': [101]})
-    lesson: LessonPublic
-    teacher: TeacherPublic
+    # lesson: LessonPublic
+    # teacher: TeacherPublic
 
 class Homework(HomeworkBase, table=True):
     __tablename__ = "homework"

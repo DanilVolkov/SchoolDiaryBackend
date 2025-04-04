@@ -1,13 +1,14 @@
 from sqlmodel import Session, select, func, and_
 from typing import List, Optional
 from datetime import date, datetime
-from models.user import User
-from models.group import Group
-from models.subject import Subject
-from models.schedule import Schedule
-from models.homework import Homework
-from models.mark import Mark
-from models.lesson import Lesson
+
+from app.models.user import User
+from app.models.group import Group
+from app.models.subject import Subject
+from app.models.schedule import Schedule
+from app.models.homework import Homework
+from app.models.mark import Mark
+from app.models.lesson import Lesson
 
 def get_user(session: Session, user_id: int) -> User:
     return session.get(User, user_id)
@@ -65,24 +66,75 @@ def get_student(session: Session, student_id: int) -> User:
     return session.exec(
         select(User)
         .where(User.id == student_id)
-        .where(User.role_id == 0)
+        .where(User.role_id == 1)
     ).first()
 
-def get_student_marks(session: Session, student_id: int) -> List[Mark]:
-    return session.exec(
-        select(Mark)
-        .where(Mark.student_id == student_id)
-    ).all()
+def get_student_marks(
+    session: Session, 
+    student_id: int,
+    from_: date | None = None,
+    to: date | None = None
+) -> List[Mark]:
+    statement = select(Mark).where(Mark.student_id == student_id)
+    if from_:
+        statement = statement.filter(Mark.date >= from_)
+    if to:
+        statement = statement.filter(Mark.date <= to)
+    return session.exec(statement).all()
 
-def get_student_homework(session: Session, student_id: int) -> List[Homework]:
-    user = session.exec(select(User).where((User.id == student_id) & (User.role_id == 0))).first()
+def get_student_homework(
+    session: Session,
+    student_id: int,
+    from_: date | None = None,
+    to: date | None = None
+) -> List[Homework]:
+    user = session.exec(select(User).where((User.id == student_id) & (User.role_id == 1))).first()
     if not user: return None
     statement = select(Homework).join(Lesson).where(Lesson.group_id == user.group_id)
+    if from_:
+        statement = statement.filter(Homework.date >= from_)
+    if to:
+        statement = statement.filter(Homework.date <= to)
     return session.exec(statement).all()
 
 def get_student_schedule(session: Session, student_id: int) -> List[Schedule]:
-    user = session.exec(select(User).where((User.id == student_id) & (User.role_id == 0))).first()
+    user = session.exec(select(User).where((User.id == student_id) & (User.role_id == 1))).first()
     if not user: return None
     statement = select(Schedule).join(Group).where(Group.id == user.group_id)
     return session.exec(statement).all()
 
+def get_student_schedule_full(
+    session: Session,
+    student_id: int,
+    from_: date | None = None,
+    to: date | None = None
+):
+    user = session.exec(select(User).where((User.id == student_id) & (User.role_id == 1))).first()
+    if not user: return None
+
+    lessons = select(Lesson).where(Lesson.group_id == user.group_id)
+    if from_:
+        lessons = lessons.filter(Lesson.lesson_date >= from_)
+    if to:
+        lessons = lessons.filter(Lesson.lesson_date <= to)
+    lessons = session.exec(lessons).all()
+
+    data = dict()
+    for lesson in lessons:
+        dof = session.exec(select(Schedule.day_of_week).join(Lesson).where(Schedule.id == lesson.id)).first()
+
+        content = data.get(dof, [])
+
+        mark = session.exec(select(Mark).where(Mark.lesson_id == lesson.id, Mark.student_id == user.id)).first()
+        homework = session.exec(select(Homework).where(Homework.lesson_id == lesson.id)).first()
+
+        content.append({
+            'lesson': lesson,
+            'mark': mark,
+            'homework': homework
+        })
+
+        data[dof] = content
+
+    result = [{'day_of_week': k, 'content': v} for k, v in data.items()]
+    return result

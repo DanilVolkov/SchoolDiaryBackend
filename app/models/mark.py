@@ -1,4 +1,4 @@
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional
 import datetime as dt
 
@@ -25,3 +25,5 @@ class Mark(MarkBase, table=True):
     lesson_id: int = Field(foreign_key="lessons.id")
     student_id: int = Field(foreign_key="users.id")
     mark_value_id: int = Field(foreign_key="mark_values.id")
+
+    mark_value: 'MarkValue' = Relationship()
