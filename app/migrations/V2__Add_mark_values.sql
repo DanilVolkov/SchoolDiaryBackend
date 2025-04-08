@@ -1,4 +1,4 @@
-INSERT INTO mark_values (value_name) VALUES
+INSERT INTO markvalue (name) VALUES
 ('5'),
 ('4'),
 ('3'),

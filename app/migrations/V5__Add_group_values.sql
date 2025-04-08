@@ -1,5 +1,4 @@
-INSERT INTO groups (name) VALUES
+INSERT INTO "group" (name) VALUES
 ('11А'),
-('5Б'),
-('7В'),
-('10Г');
+('11Б'),
+('11В');

@@ -1,4 +1,4 @@
-INSERT INTO roles (name) VALUES
-('student')
-,('teacher')
-,('admin');
+INSERT INTO role (name) VALUES
+('admin'),
+('teacher'),
+('student');
