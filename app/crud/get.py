@@ -14,12 +14,10 @@ def get_group(session: Session, group_id: int) -> Group:
     return session.get(Group, group_id)
 
 def get_student(session: Session, student_id: int) -> User:
-    role_id = session.exec(select(Role).where(Role.name == 'student')).first().id
-    statement = session.exec(
-        select(User)
-        .where(User.id == student_id)
-        .where(User.role_id == role_id)
-    )
+    role = session.exec(select(Role).where(Role.name == 'student')).first()
+    statement = select(User)\
+                .where(User.id == student_id)\
+                .where(User.role_id == role.id)
     result = session.exec(statement).first()
     return result
 
@@ -175,7 +173,7 @@ def get_all_roles(session: Session) -> List[Role]:
     result = session.exec(statement).all()
     return result
 
-def get_roles(session: Session, role_id: int) -> Role:
+def get_role(session: Session, role_id: int) -> Role:
     statement = select(Role).where(Role.id == role_id)
     result = session.exec(statement).first()
     return result
@@ -185,7 +183,7 @@ def get_mark_values(session: Session) -> List[MarkValue]:
     result = session.exec(statement).all()
     return result
 
-def get_mark_value_by_id(session: Session, mark_value_id) -> MarkValue:
+def get_mark_value(session: Session, mark_value_id: int) -> MarkValue:
     statement = select(MarkValue).where(MarkValue.id == mark_value_id)
     result = session.exec(statement).first()
     return result
