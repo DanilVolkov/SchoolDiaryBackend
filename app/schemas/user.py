@@ -11,7 +11,7 @@ class UserBase(SQLModel):
     middle_name: Optional[str] = Field(None, schema_extra={'examples': ['Владимирович']})
     date_of_birth: date = Field(schema_extra={'examples': [date(2003, 8, 15)]})
     role_id: int = Field(schema_extra={'examples': [101]})
-    group_id: int = Field(schema_extra={'examples': [101]})
+    group_id: int | None = Field(None, schema_extra={'examples': [101]})
 
 class UserCreate(UserBase):
     password: str = Field(min_length=8, max_length=40)
