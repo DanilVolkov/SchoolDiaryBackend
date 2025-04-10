@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Query, Body
 from typing import Optional
 
-from app.models.homework import HomeworkBase, HomeworkUpdate, HomeworkPublic
+from app.schemas.homework import HomeworkBase, HomeworkUpdate, HomeworkPublic
 from app.helpers.path import ID
 
 router = APIRouter(

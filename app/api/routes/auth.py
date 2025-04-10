@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Query
-from app.models.auth import Auth
+from app.schemas.auth import Auth
 
 router = APIRouter(
     prefix='/auth',

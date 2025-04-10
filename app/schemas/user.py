@@ -2,6 +2,8 @@ from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional
 from datetime import date
 
+from .misc import ID
+
 class UserBase(SQLModel):
     username: str = Field(schema_extra={'examples': ['yuraskamaz']})
     first_name: str = Field(schema_extra={'examples': ['Юрий']})
@@ -23,5 +25,4 @@ class UserUpdate(UserBase):
     role_id: Optional[int] = Field(None, schema_extra={'examples': [101]})
     group_id: Optional[int] = Field(None, schema_extra={'examples': [101]})
 
-class UserPublic(UserBase):
-    id: int = Field(schema_extra={'examples': ['101']})
+class UserPublic(UserBase, ID): ...

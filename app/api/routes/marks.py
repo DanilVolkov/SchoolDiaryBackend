@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Query, Body
 from typing import Optional
 
-from app.models.mark import MarkBase, MarkUpdate, MarkPublic
+from app.schemas.mark import MarkBase, MarkUpdate, MarkPublic
 from app.helpers.path import ID
 
 router = APIRouter(

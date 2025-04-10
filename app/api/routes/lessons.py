@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Query, Body
 
-from app.models.lesson import LessonBase, LessonUpdate, LessonPublic
+from app.schemas.lesson import LessonBase, LessonUpdate, LessonPublic
 from app.helpers.path import ID
 
 router = APIRouter(

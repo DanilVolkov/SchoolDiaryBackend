@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Query
 
-from app.models.teacher import TeacherPublic
-from app.models.homework import HomeworkPublic
-from app.models.mark import MarkPublic
-from app.models.schedule import SchedulePublic
+from app.schemas.teacher import TeacherPublic
+from app.schemas.homework import HomeworkPublic
+from app.schemas.mark import MarkPublic
+from app.schemas.schedule import SchedulePublic
 
 from app.helpers.path import ID
 
@@ -23,6 +23,7 @@ def get_current_teacher() -> TeacherPublic: return
     '/{id}/homeworks',
     summary="Получить домашние задания, выданные учителем",
     description="Возвращает список домашних заданий, выданных указанным учителем.",
+    include_in_schema=False
 )
 def get_teacher_homeworks(
     id: int = ID('учителя (пользователя)'),

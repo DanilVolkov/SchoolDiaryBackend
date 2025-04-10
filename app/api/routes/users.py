@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Body
 
-from app.models.user import UserBase, UserUpdate, UserPublic
+from app.schemas.user import UserBase, UserUpdate, UserPublic
 from app.helpers.path import ID
 
 router = APIRouter(

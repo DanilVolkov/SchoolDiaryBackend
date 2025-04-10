@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Query, Body
 from typing import Optional
 
-from app.models.schedule import (
+from app.schemas.schedule import (
     ScheduleObjectBase, ScheduleObjectUpdate, ScheduleObjectPublic,
     SchedulePublic
 )

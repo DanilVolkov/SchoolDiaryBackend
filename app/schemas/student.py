@@ -1,13 +1,15 @@
-from sqlmodel import Field
-from typing import Optional
+from sqlmodel import SQLModel, Field
 
-from .user import UserBase, UserUpdate
+from .misc import ID
+from .user import UserPublic
+from .subject import SubjectPublic
+from .mark import MarkPublic
 
-class StudentBase(UserBase):
+class StudentPublic(UserPublic, ID):
+    role: str = Field(schema_extra={'examples': ['Ученик']})
     group: str = Field(schema_extra={'examples': ['11A']})
 
-class StudentUpdate(UserUpdate):
-    group: Optional[str] = Field(None, schema_extra={'examples': ['11A']})
-
-class StudentPublic(StudentBase):
-    id: int = Field(schema_extra={'examples': [101]})
+class StudentMarks(SQLModel):
+    subject: SubjectPublic
+    marks: list[MarkPublic]
+    average: str = Field(schema_extra={'examples': ['4.6']})

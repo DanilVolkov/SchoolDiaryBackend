@@ -2,9 +2,10 @@ from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional
 import datetime as dt
 
+from .group import GroupPublic
 from .subject import SubjectPublic
 from .teacher import TeacherPublic
-from .misc import ClassroomPublic
+from .misc import ID, ClassroomPublic
 
 class LessonBase(SQLModel):
     schedule_id: int = Field(schema_extra={'examples': [101]})
@@ -26,8 +27,8 @@ class LessonUpdate(LessonBase):
     time_start: Optional[str] = Field(None, schema_extra={'examples': [dt.time(8, 30)]})
     time_end: Optional[str] = Field(None, schema_extra={'examples': [dt.time(9, 10)]})
 
-class LessonPublic(LessonBase):
-    id: int = Field(schema_extra={'examples': [101]})
+class LessonPublic(LessonBase, ID):
+    group: GroupPublic
     subject: SubjectPublic
     teacher: TeacherPublic
     classroom: ClassroomPublic

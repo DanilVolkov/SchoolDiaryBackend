@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Body
 
-from app.models.group import GroupUpdate, GroupPublic
+from app.schemas.group import GroupUpdate, GroupPublic
 from app.helpers.path import ID 
 
 router = APIRouter(

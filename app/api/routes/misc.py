@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Body
 
-from app.models.misc import (
-    ClassroomBase, ClassroomUpdate, Classroom,
-    RoleBase, RoleUpdate, Role,
-    MarkValueBase, MarkValueUpdate, MarkValue
+from app.schemas.misc import (
+    ClassroomBase, ClassroomUpdate, ClassroomPublic,
+    RoleBase, RoleUpdate, RolePublic,
+    MarkValueBase, MarkValueUpdate, MarkValuePublic
 )
 from app.helpers.path import ID
 
@@ -17,7 +17,7 @@ router = APIRouter(
     summary="Получить список аудиторий",
     description="Возвращает список аудиторий.",
 )
-def get_classrooms() -> list[Classroom]: return
+def get_classrooms() -> list[ClassroomPublic]: return
 
 @router.post(
     '/classrooms',
@@ -26,7 +26,7 @@ def get_classrooms() -> list[Classroom]: return
 )
 def create_classroom(
     c: ClassroomBase = Body(..., description="Данные новой аудитории")
-) -> Classroom: return
+) -> ClassroomPublic: return
 
 @router.get(
     '/classrooms/{id}',
@@ -35,7 +35,7 @@ def create_classroom(
 )
 def get_classroom(
     id: int = ID('аудитории')
-) -> Classroom: return
+) -> ClassroomPublic: return
 
 @router.put(
     '/classrooms/{id}',
@@ -45,7 +45,7 @@ def get_classroom(
 def update_classroom(
     id: int = ID('аудитории'), 
     c: ClassroomUpdate = Body(..., description="Данные для обновления аудитории")
-) -> Classroom: return
+) -> ClassroomPublic: return
 
 @router.delete(
     '/classrooms/{id}',
@@ -63,7 +63,7 @@ def delete_classroom(
     summary="Получить список ролей",
     description="Возвращает список ролей.",
 )
-def get_roles() -> list[Role]: return
+def get_roles() -> list[RolePublic]: return
 
 @router.post(
     '/roles',
@@ -72,7 +72,7 @@ def get_roles() -> list[Role]: return
 )
 def create_role(
     r: RoleBase = Body(..., description="Данные новой роли")
-) -> Role: return
+) -> RolePublic: return
 
 @router.get(
     '/roles/{id}',
@@ -81,7 +81,7 @@ def create_role(
 )
 def get_role(
     id: int = ID('роли')
-) -> Role: return
+) -> RolePublic: return
 
 @router.put(
     '/roles/{id}',
@@ -91,7 +91,7 @@ def get_role(
 def update_role(
     id: int = ID('роли'), 
     r: RoleUpdate = Body(..., description="Данные для обновления роли")
-) -> Role: return
+) -> RolePublic: return
 
 @router.delete(
     '/roles/{id}',
@@ -109,7 +109,7 @@ def delete_role(
     summary="Получить список значений оценок",
     description="Возвращает список значений оценок.",
 )
-def get_mark_values() -> list[MarkValue]: return
+def get_mark_values() -> list[MarkValuePublic]: return
 
 @router.post(
     '/markvalues',
@@ -118,7 +118,7 @@ def get_mark_values() -> list[MarkValue]: return
 )
 def create_mark_value(
     c: MarkValueBase = Body(..., description="Данные нового значения оценки")
-) -> MarkValue: return
+) -> MarkValuePublic: return
 
 @router.get(
     '/markvalues/{id}',
@@ -127,7 +127,7 @@ def create_mark_value(
 )
 def get_mark_value(
     id: int = ID('значения оценки')
-) -> MarkValue: return
+) -> MarkValuePublic: return
 
 @router.put(
     '/markvalues/{id}',
@@ -137,7 +137,7 @@ def get_mark_value(
 def update_mark_value(
     id: int = ID('значения оценки'), 
     c: MarkValueUpdate = Body(..., description="Данные для обновления значения оценки")
-) -> MarkValue: return
+) -> MarkValuePublic: return
 
 @router.delete(
     '/markvalues/{id}',

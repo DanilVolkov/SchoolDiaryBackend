@@ -2,10 +2,10 @@ from fastapi import APIRouter, Query, HTTPException
 
 from app import crud
 from app.api.deps import SessionDep
-from app.models.student import StudentPublic
-from app.models.homework import HomeworkPublic
-from app.models.mark import MarkPublic
-from app.models.schedule import SchedulePublic
+from app.schemas.student import StudentPublic, StudentMarks, StudentSchedule
+from app.schemas.homework import HomeworkPublic
+from app.schemas.mark import MarkPublic
+from app.schemas.schedule import SchedulePublic
 
 from app.helpers.path import ID
 
@@ -25,6 +25,7 @@ def get_current_student() -> StudentPublic: return
     '/{id}/homeworks',
     summary="Получить домашние задания ученика",
     description="Возвращает список домашних заданий для указанного ученика.",
+    include_in_schema=False
 )
 def get_student_homeworks(
     session: SessionDep,
@@ -50,8 +51,8 @@ def get_student_marks(
     id: int = ID('ученика (пользователя)'),
     from_: str = Query(None, alias='from', description="Начальная дата для фильтрации (YYYY-MM-DD)"),
     to: str = Query(None, description="Конечная дата для фильтрации (YYYY-MM-DD)")
-) -> list[MarkPublic]:
-    return crud.get_student_marks(session, id, from_, to)
+) -> list[StudentMarks]:
+    return
 
 @router.get(
     '/{id}/schedule',
@@ -63,7 +64,7 @@ def get_student_schedule(
     id: int = ID('ученика (пользователя)'),
     from_: str = Query(None, alias='from', description="Начальная дата для фильтрации (YYYY-MM-DD)"),
     to: str = Query(None, description="Конечная дата для фильтрации (YYYY-MM-DD)")
-) -> list[SchedulePublic]:
+) -> list[StudentSchedule]:
     schedule = crud.get_student_schedule_full(session, id, from_, to)
     if schedule is None:
         raise HTTPException(
