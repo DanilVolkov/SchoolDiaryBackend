@@ -72,29 +72,30 @@ def get_student_schedule_full(
 
     lessons = select(Lesson).where(Lesson.group_id == user.group_id)
     if from_:
-        lessons = lessons.filter(Lesson.lesson_date >= from_)
+        lessons = lessons.filter(Lesson.date >= from_)
     if to:
-        lessons = lessons.filter(Lesson.lesson_date <= to)
-    lessons = session.exec(lessons).all()
+        lessons = lessons.filter(Lesson.date <= to)
+    lessons = session.exec(lessons.order_by(Lesson.date)).all()
 
     data = dict()
     for lesson in lessons:
-        dof = session.exec(select(Schedule.day_of_week).join(Lesson).where(Schedule.id == lesson.id)).first()
+        dow = session.exec(select(Schedule.day_of_week).join(Lesson).where(Schedule.id == lesson.schedule_id)).first()
+        datestr = str(lesson.date)
 
-        content = data.get(dof, [])
+        content = data.get(f'{dow}/{datestr}', [])
 
-        mark = session.exec(select(Mark).where(Mark.lesson_id == lesson.id, Mark.student_id == user.id)).first()
+        marks = session.exec(select(Mark).where(Mark.lesson_id == lesson.id, Mark.student_id == user.id)).all()
         homework = session.exec(select(Homework).where(Homework.lesson_id == lesson.id)).first()
 
         content.append({
             'lesson': lesson,
-            'mark': mark,
+            'marks': marks,
             'homework': homework
         })
 
-        data[dof] = content
+        data[f'{dow}/{datestr}'] = content
 
-    result = [{'day_of_week': k, 'content': v} for k, v in data.items()]
+    result = [{'day_of_week': k[0], 'content': v} for k, v in data.items()]
     return result
 
 def get_teacher(session: Session, teacher_id: int) -> User:

@@ -2,10 +2,9 @@ from fastapi import APIRouter, Query, HTTPException
 
 from app import crud
 from app.api.deps import SessionDep
-from app.schemas.student import StudentPublic, StudentMarks, StudentSchedule
+from app.schemas.student import StudentPublic, StudentMarks
 from app.schemas.homework import HomeworkPublic
-from app.schemas.mark import MarkPublic
-from app.schemas.schedule import SchedulePublic
+from app.schemas.schedule import StudentSchedule
 
 from app.helpers.path import ID
 
@@ -15,11 +14,21 @@ router = APIRouter(
 )
 
 @router.get(
-    '/me',
+    '/{id}',
     summary="Получить текущего ученика",
     description="Возвращает информацию о текущем аутентифицированном ученике.",
 )
-def get_current_student() -> StudentPublic: return
+def get_current_student(
+    session: SessionDep,
+    id: int
+) -> StudentPublic: 
+    student = crud.get_student(session, id)
+    if student is None:
+        raise HTTPException(
+            status_code=404,
+            detail='Student not found'
+        )
+    return student
 
 @router.get(
     '/{id}/homeworks',
@@ -52,7 +61,30 @@ def get_student_marks(
     from_: str = Query(None, alias='from', description="Начальная дата для фильтрации (YYYY-MM-DD)"),
     to: str = Query(None, description="Конечная дата для фильтрации (YYYY-MM-DD)")
 ) -> list[StudentMarks]:
-    return
+    marks = crud.get_student_marks(session, id, from_, to)
+    data = dict()
+    for mark in marks:
+        subject = mark.lesson.subject.name
+        if data.get(subject) is None:
+            data[subject] = {'marks': [], 'sum': 0}
+        content = data[subject]
+        content['marks'].append(mark)
+        if mark.value.name in ['н', 'б']:
+            continue
+        content['sum'] += int(mark.value.name)
+    result = []
+    subjects = crud.get_all_subjects(session)
+    for subject in subjects:
+        content = data.get(subject.name)
+        if content is None:
+            continue
+        marks=sorted(content['marks'], key=lambda m: m.date)
+        result.append(StudentMarks(
+            subject=subject,
+            marks=marks,
+            average=round(content['sum']/len(marks), 2)
+        ))
+    return result
 
 @router.get(
     '/{id}/schedule',
