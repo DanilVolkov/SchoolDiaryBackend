@@ -34,7 +34,7 @@ class LessonEntry(SQLModel):
     marks: list[MarkPublic]
 
 class TeacherMarks(SQLModel):
-    group: str = Field(schema_extra={'examples': ['11A']})
-    subject: SubjectPublic
+    group: str = Field(schema_extra={'examples': ['11Б']})
+    subject: str = Field(schema_extra={'examples': ['Алгебра']})
     students: list[StudentEntry]
     lessons: list[LessonEntry]

@@ -79,7 +79,7 @@ def get_student_schedule_full(
 
     data = dict()
     for lesson in lessons:
-        dow = session.exec(select(Schedule.day_of_week).join(Lesson).where(Schedule.id == lesson.schedule_id)).first()
+        dow = session.exec(select(Schedule.day_of_week).where(Schedule.id == lesson.schedule_id)).first()
         datestr = str(lesson.date)
 
         content = data.get(f'{dow}/{datestr}', [])
@@ -117,6 +117,42 @@ def get_teacher_schedule(
     result = session.exec(statement).all()
     return result
 
+def get_teacher_schedule_full(
+    session: Session,
+    teacher_id: int,
+    from_: date | None = None,
+    to: date | None = None
+):
+    role = session.exec(select(Role).where(Role.name == 'teacher')).first()
+    user = session.exec(select(User).where((User.id == teacher_id) & (User.role_id == role.id))).first()
+    if not user: return None
+
+    lessons = select(Lesson).where(Lesson.teacher_id == user.id)
+    if from_:
+        lessons = lessons.filter(Lesson.date >= from_)
+    if to:
+        lessons = lessons.filter(Lesson.date <= to)
+    lessons = session.exec(lessons.order_by(Lesson.date)).all()
+
+    data = dict()
+    for lesson in lessons:
+        dow = session.exec(select(Schedule.day_of_week).where(Schedule.id == lesson.schedule_id)).first()
+        datestr = str(lesson.date)
+
+        content = data.get(f'{dow}/{datestr}', [])
+
+        homework = session.exec(select(Homework).where(Homework.lesson_id == lesson.id)).first()
+
+        content.append({
+            'lesson': lesson,
+            'homework': homework
+        })
+
+        data[f'{dow}/{datestr}'] = content
+
+    result = [{'day_of_week': k[0], 'content': v} for k, v in data.items()]
+    return result
+
 def get_teacher_homeworks(
     session: Session, 
     teacher_id: int,
@@ -148,6 +184,60 @@ def get_teacher_marks(
     statement = select(Mark).where(Mark.lesson_id == lesson.id)
     result = session.exec(statement).all()
     return result
+
+def get_teacher_marks_full(
+    session: Session,
+    teacher_id: int,
+    group: str,
+    subject: str,
+    from_: date | None = None,
+    to: date | None = None
+):
+    group_obj = session.exec(select(Group).where(Group.name == group)).first()
+    subject_obj = session.exec(select(Subject).where(Subject.name == subject)).first()
+    lessons = session.exec(
+        select(Lesson)
+        .where(Lesson.group_id == group_obj.id, Lesson.subject_id == subject_obj.id)
+        .order_by(Lesson.date, Lesson.time_start)
+    ).all()
+    students = session.exec(
+        select(User)
+        .where(User.group_id == group_obj.id)
+        .order_by(User.last_name, User.first_name, User.middle_name)
+    ).all()
+    data = []
+    avgs = dict()
+    def avg_marks(marks: list[Mark]):
+        sum = 0
+        for mark in marks:
+            if mark.value.name in ['н', 'б']:
+                continue
+            sum += int(mark.value.name)
+        return round(sum / len(marks), 2)
+    for lesson in lessons:
+        content = {
+            'id': lesson.id,
+            'date': lesson.date,
+            'marks': []
+        }
+        for student in students:
+            marks = session.exec(
+                select(Mark)
+                .where(Mark.lesson_id == lesson.id, Mark.student_id == student.id)
+            ).all()
+            if not marks:
+                continue
+            content['marks'].extend(marks)
+            avg = avgs.get(student.id, [])
+            avg.extend(marks)
+            avgs[student.id] = avg
+        data.append(content)
+    return {
+        'group': group,
+        'subject': subject,
+        'students': [{'student': s, 'average_mark': avg_marks(avgs[s.id])} for s in students],
+        'lessons': data
+    }
 
 def get_all_subjects(session: Session) -> List[Subject]:
     statement = select(Subject)

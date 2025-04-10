@@ -1,6 +1,8 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Path, Query, HTTPException
 
-from app.schemas.teacher import TeacherPublic
+from app import crud
+from app.api.deps import SessionDep
+from app.schemas.teacher import TeacherPublic, TeacherMarks
 from app.schemas.homework import HomeworkPublic
 from app.schemas.mark import MarkPublic
 from app.schemas.schedule import SchedulePublic
@@ -13,11 +15,21 @@ router = APIRouter(
 )
 
 @router.get(
-    '/me',
+    '/{id}',
     summary="Получить текущего учителя",
     description="Возвращает информацию о текущем аутентифицированном учителе.",
 )
-def get_current_teacher() -> TeacherPublic: return
+def get_current_teacher(
+    session: SessionDep,
+    id: int
+) -> TeacherPublic:
+    teacher = crud.get_teacher(session, id)
+    if teacher is None:
+        raise HTTPException(
+            status_code=404,
+            detail='Teacher not found'
+        )
+    return teacher
 
 @router.get(
     '/{id}/homeworks',
@@ -26,6 +38,7 @@ def get_current_teacher() -> TeacherPublic: return
     include_in_schema=False
 )
 def get_teacher_homeworks(
+    session: SessionDep,
     id: int = ID('учителя (пользователя)'),
     from_: str = Query(None, alias='from', description="Начальная дата для фильтрации (YYYY-MM-DD)"),
     to: str = Query(None, description="Конечная дата для фильтрации (YYYY-MM-DD)")
@@ -37,10 +50,16 @@ def get_teacher_homeworks(
     description="Возвращает список оценок, выставленных указанным учителем.",
 )
 def get_teacher_marks(
+    session: SessionDep,
     id: int = ID('учителя (пользователя)'),
-    from_: str = Query(None, alias='from', description="Начальная дата для фильтрации (YYYY-MM-DD)"),
-    to: str = Query(None, description="Конечная дата для фильтрации (YYYY-MM-DD)")
-) -> list[MarkPublic]: return
+    group: str = Query(description='Группа', example='11Б'),
+    subject: str = Query(description='Предмет', example='Алгебра'),
+    # from_: str = Query(None, alias='from', description="Начальная дата для фильтрации (YYYY-MM-DD)"),
+    # to: str = Query(None, description="Конечная дата для фильтрации (YYYY-MM-DD)")
+) -> TeacherMarks: 
+    return crud.get_teacher_marks_full(
+        session, id, group, subject
+    )
 
 @router.get(
     '/{id}/schedule',
@@ -48,7 +67,15 @@ def get_teacher_marks(
     description="Возвращает расписание для указанного учителя.",
 )
 def get_teacher_schedule(
+    session: SessionDep,
     id: int = ID('учителя (пользователя)'),
     from_: str = Query(None, alias='from', description="Начальная дата для фильтрации (YYYY-MM-DD)"),
     to: str = Query(None, description="Конечная дата для фильтрации (YYYY-MM-DD)")
-) -> list[SchedulePublic]: return
+) -> list[SchedulePublic]:
+    schedule = crud.get_teacher_schedule_full(session, id, from_, to)
+    if schedule is None:
+        raise HTTPException(
+            status_code=404,
+            detail='Teacher not found'
+        )
+    return schedule
