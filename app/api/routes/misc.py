@@ -1,5 +1,7 @@
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, HTTPException
 
+from app import crud
+from app.api.deps import SessionDep
 from app.schemas.misc import (
     ClassroomBase, ClassroomUpdate, ClassroomPublic,
     RoleBase, RoleUpdate, RolePublic,
@@ -17,7 +19,8 @@ router = APIRouter(
     summary="Получить список аудиторий",
     description="Возвращает список аудиторий.",
 )
-def get_classrooms() -> list[ClassroomPublic]: return
+def get_classrooms(session: SessionDep) -> list[ClassroomPublic]: 
+    return crud.get_all_classrooms(session)
 
 @router.post(
     '/classrooms',
@@ -25,8 +28,10 @@ def get_classrooms() -> list[ClassroomPublic]: return
     description="Создает новую аудиторию.",
 )
 def create_classroom(
+    session: SessionDep,
     c: ClassroomBase = Body(..., description="Данные новой аудитории")
-) -> ClassroomPublic: return
+) -> ClassroomPublic:
+    return crud.create_classroom(session, c)
 
 @router.get(
     '/classrooms/{id}',
@@ -34,8 +39,16 @@ def create_classroom(
     description="Возвращает информацию об аудитории по её идентификатору.",
 )
 def get_classroom(
+    session: SessionDep,
     id: int = ID('аудитории')
-) -> ClassroomPublic: return
+) -> ClassroomPublic:
+    result = crud.get_classroom(session, id)
+    if result is None:
+        raise HTTPException(
+            status_code=404,
+            detail='Classroom not found'
+        )
+    return result
 
 @router.put(
     '/classrooms/{id}',
@@ -43,9 +56,17 @@ def get_classroom(
     description="Обновляет информацию об аудитории по её идентификатору.",
 )
 def update_classroom(
+    session: SessionDep,
     id: int = ID('аудитории'), 
     c: ClassroomUpdate = Body(..., description="Данные для обновления аудитории")
-) -> ClassroomPublic: return
+) -> ClassroomPublic:
+    result = crud.update_classroom(session, id, c)
+    if result is None:
+        raise HTTPException(
+            status_code=404,
+            detail='Classroom not found'
+        )
+    return result
 
 @router.delete(
     '/classrooms/{id}',
@@ -53,8 +74,9 @@ def update_classroom(
     description="Удаляет аудиторию по её идентификатору.",
 )
 def delete_classroom(
+    session: SessionDep,
     id: int = ID('аудитории')
-): return
+): return crud.delete_classroom(session, id)
 
 
 
@@ -63,7 +85,8 @@ def delete_classroom(
     summary="Получить список ролей",
     description="Возвращает список ролей.",
 )
-def get_roles() -> list[RolePublic]: return
+def get_roles(session: SessionDep) -> list[RolePublic]:
+    return crud.get_all_roles(session)
 
 @router.post(
     '/roles',
@@ -71,8 +94,10 @@ def get_roles() -> list[RolePublic]: return
     description="Создает новую роль.",
 )
 def create_role(
+    session: SessionDep,
     r: RoleBase = Body(..., description="Данные новой роли")
-) -> RolePublic: return
+) -> RolePublic:
+    return crud.create_role(session, r)
 
 @router.get(
     '/roles/{id}',
@@ -80,8 +105,16 @@ def create_role(
     description="Возвращает информацию о роли по её идентификатору.",
 )
 def get_role(
+    session: SessionDep,
     id: int = ID('роли')
-) -> RolePublic: return
+) -> RolePublic:
+    result = crud.get_role(session, id)
+    if result is None:
+        raise HTTPException(
+            status_code=404,
+            detail='Role not found'
+        )
+    return result
 
 @router.put(
     '/roles/{id}',
@@ -89,9 +122,17 @@ def get_role(
     description="Обновляет информацию о роли по её идентификатору.",
 )
 def update_role(
+    session: SessionDep,
     id: int = ID('роли'), 
     r: RoleUpdate = Body(..., description="Данные для обновления роли")
-) -> RolePublic: return
+) -> RolePublic:
+    result = crud.update_role(session, id, r)
+    if result is None:
+        raise HTTPException(
+            status_code=404,
+            detail='Role not found'
+        )
+    return result
 
 @router.delete(
     '/roles/{id}',
@@ -99,8 +140,9 @@ def update_role(
     description="Удаляет роль по её идентификатору.",
 )
 def delete_role(
+    session: SessionDep,
     id: int = ID('роли')
-): return
+): return crud.delete_role(session, id)
 
 
 
@@ -109,7 +151,8 @@ def delete_role(
     summary="Получить список значений оценок",
     description="Возвращает список значений оценок.",
 )
-def get_mark_values() -> list[MarkValuePublic]: return
+def get_mark_values(session: SessionDep) -> list[MarkValuePublic]:
+    return crud.get_mark_values(session)
 
 @router.post(
     '/markvalues',
@@ -117,8 +160,10 @@ def get_mark_values() -> list[MarkValuePublic]: return
     description="Создает новое значение оценки.",
 )
 def create_mark_value(
-    c: MarkValueBase = Body(..., description="Данные нового значения оценки")
-) -> MarkValuePublic: return
+    session: SessionDep,
+    m: MarkValueBase = Body(..., description="Данные нового значения оценки")
+) -> MarkValuePublic:
+    return crud.create_mark_value(session, m)
 
 @router.get(
     '/markvalues/{id}',
@@ -126,8 +171,16 @@ def create_mark_value(
     description="Возвращает информацию о значении оценки по идентификатору.",
 )
 def get_mark_value(
+    session: SessionDep,
     id: int = ID('значения оценки')
-) -> MarkValuePublic: return
+) -> MarkValuePublic:
+    result = crud.get_mark_value(session, id)
+    if result is None:
+        raise HTTPException(
+            status_code=404,
+            detail='MarkValue not found'
+        )
+    return result
 
 @router.put(
     '/markvalues/{id}',
@@ -135,9 +188,17 @@ def get_mark_value(
     description="Обновляет информацию о значении оценки по идентификатору.",
 )
 def update_mark_value(
+    session: SessionDep,
     id: int = ID('значения оценки'), 
-    c: MarkValueUpdate = Body(..., description="Данные для обновления значения оценки")
-) -> MarkValuePublic: return
+    m: MarkValueUpdate = Body(..., description="Данные для обновления значения оценки")
+) -> MarkValuePublic:
+    result = crud.update_mark_value(session, id, m)
+    if result is None:
+        raise HTTPException(
+            status_code=404,
+            detail='MarkValue not found'
+        )
+    return result
 
 @router.delete(
     '/markvalues/{id}',
@@ -145,5 +206,6 @@ def update_mark_value(
     description="Удаляет значение оценки по идентификатору.",
 )
 def delete_mark_value(
+    session: SessionDep,
     id: int = ID('значения оценки')
-): return
+): return crud.delete_mark_value(session, id)
