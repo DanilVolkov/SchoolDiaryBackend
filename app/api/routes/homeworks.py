@@ -1,6 +1,8 @@
-from fastapi import APIRouter, Query, Body
+from fastapi import APIRouter, Query, Body, HTTPException
 from typing import Optional
 
+from app import crud
+from app.api.deps import SessionDep
 from app.schemas.homework import HomeworkBase, HomeworkUpdate, HomeworkPublic
 from app.helpers.path import ID
 
@@ -15,12 +17,18 @@ router = APIRouter(
     description="Возвращает список домашних заданий с возможностью фильтрации.",
 )
 def get_homeworks(
+    session: SessionDep,
     student: Optional[int] = Query(None, description="ID ученика для фильтрации"),
     group: Optional[str] = Query(None, description="Название группы для фильтрации"),
     teacher: Optional[int] = Query(None, description="ID учителя для фильтрации"),
     from_: Optional[str] = Query(None, alias='from', description="Начальная дата для фильтрации (YYYY-MM-DD)"),
     to: Optional[str] = Query(None, description="Конечная дата для фильтрации (YYYY-MM-DD)")
-) -> list[HomeworkPublic]: return
+) -> list[HomeworkPublic]:
+    homeworks = crud.get_homeworks(session,
+        student, group, teacher,
+        from_, to
+    )
+    return homeworks
 
 @router.post(
     '/',
@@ -28,8 +36,10 @@ def get_homeworks(
     description="Создает новое домашнее задание.",
 )
 def create_homework(
+    session: SessionDep,
     h: HomeworkBase = Body(..., description="Данные нового домашнего задания")
-) -> HomeworkPublic: return
+) -> HomeworkPublic: 
+    return crud.create_homework(session, h)
 
 @router.get(
     '/{id}',
@@ -37,8 +47,16 @@ def create_homework(
     description="Возвращает информацию о домашнем задании по его идентификатору.",
 )
 def get_homework(
+    session: SessionDep,
     id: int = ID('домашнего задания')
-) -> HomeworkPublic: return
+) -> HomeworkPublic: 
+    homework = crud.get_homework_by_id(session, id)
+    if homework is None:
+        raise HTTPException(
+            status_code=404,
+            detail='Homework not found'
+        )
+    return homework
 
 @router.put(
     '/{id}',
@@ -46,9 +64,17 @@ def get_homework(
     description="Обновляет информацию о домашнем задании по его идентификатору.",
 )
 def update_homework(
+    session: SessionDep,
     id: int = ID('домашнего задания'),
     h: HomeworkUpdate = Body(..., description="Данные для обновления домашнего задания")
-) -> HomeworkPublic: return
+) -> HomeworkPublic:
+    homework = crud.update_homework(session, id, h)
+    if homework is None:
+        raise HTTPException(
+            status_code=404,
+            detail='Homework not found'
+        )
+    return homework
 
 @router.delete(
     '/{id}',
@@ -56,5 +82,6 @@ def update_homework(
     description="Удаляет домашнее задание по его идентификатору.",
 )
 def delete_homework(
+    session: SessionDep,
     id: int = ID('домашнего задания')
-): return
+): return crud.delete_homework(session, id)

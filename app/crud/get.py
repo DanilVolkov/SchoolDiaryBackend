@@ -317,17 +317,17 @@ def get_marks(
         statement = statement.filter(Mark.student_id == student)
     if group:
         group_id = session.exec(select(Group).where(Group.name == group)).first().id
-        lesson = session.exec(select(Lesson).where(Lesson.group_id == group_id)).first()
-        statement = statement.filter(Mark.lesson_id == lesson.id)
+        lessons = session.exec(select(Lesson.id).where(Lesson.group_id == group_id)).all()
+        statement = statement.filter(Homework.lesson_id.in_(lessons))
     if subject:
         subject_id = session.exec(select(Subject).where(Subject.name == subject)).first().id
-        lesson = session.exec(select(Lesson).where(Lesson.subject_id == subject_id)).first()
-        statement = statement.filter(Mark.lesson_id == lesson.id)
+        lessons = session.exec(select(Lesson).where(Lesson.subject_id == subject_id)).all()
+        statement = statement.filter(Mark.lesson_id.in_(lessons))
     if from_:
         statement = statement.filter(Mark.date >= from_)
     if to:
         statement = statement.filter(Mark.date <= to)
-    result = session.exec(statement).all()
+    result = session.exec(statement.order_by(Mark.date)).all()
     return result
 
 def get_mark_by_id(session: Session, mark_id: int):
@@ -371,19 +371,19 @@ def get_homeworks(
     statement = select(Homework)
     if student:
         group_id = session.exec(select(User).where(User.id == student)).first().group_id
-        lesson = session.exec(select(Lesson).where(Lesson.group_id == group_id)).first()
-        statement = statement.filter(Homework.lesson_id == lesson)
+        lessons = session.exec(select(Lesson.id).where(Lesson.group_id == group_id)).all()
+        statement = statement.filter(Homework.lesson_id.in_(lessons))
     if group:
         group_id = session.exec(select(Group).where(Group.name == group)).first().id
-        lesson = session.exec(select(Lesson).where(Lesson.group_id == group_id)).first()
-        statement = statement.filter(Homework.lesson_id == lesson.id)
+        lessons = session.exec(select(Lesson.id).where(Lesson.group_id == group_id)).all()
+        statement = statement.filter(Homework.lesson_id.in_(lessons))
     if teacher:
         statement = statement.filter(Homework.teacher_id == teacher)
     if from_:
         statement = statement.filter(Homework.date >= from_)
     if to:
         statement = statement.filter(Homework.date <= to)
-    result = session.exec(statement).all()
+    result = session.exec(statement.order_by(Homework.date)).all()
     return result
 
 def get_homework_by_id(session: Session, homework_id: int):
