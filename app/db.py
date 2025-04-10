@@ -2,17 +2,7 @@ from sqlmodel import create_engine, SQLModel, Session
 import os
 from dotenv import load_dotenv
 
-from app.models.misc import MarkValue
-from app.models.user import User
-from app.models.group import Group
-from app.models.subject import Subject
-from app.models.schedule import Schedule
-from app.models.homework import Homework
-from app.models.mark import Mark
-from app.models.misc import Classroom, Role
-from app.models.lesson import Lesson
-
-from app import migrations
+from models import MarkValue, User, Group, Subject, Schedule, Homework, Mark, Classroom, Lesson, Role
 
 load_dotenv()
 
@@ -35,4 +25,4 @@ def get_session():
 
 if __name__ == "__main__":
     init_db()
-    migrations.run_migrations()
+    #migrations.run_migrations()

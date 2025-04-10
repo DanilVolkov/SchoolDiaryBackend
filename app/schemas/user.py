@@ -11,6 +11,9 @@ class UserBase(SQLModel):
     role_id: int = Field(schema_extra={'examples': [101]})
     group_id: int = Field(schema_extra={'examples': [101]})
 
+class UserCreate(UserBase):
+    password: str = Field(min_length=8, max_length=40)
+
 class UserUpdate(UserBase):
     username: Optional[str] = Field(None, schema_extra={'examples': ['yuraskamaz']})
     first_name: Optional[str] = Field(None, schema_extra={'examples': ['Юрий']})
