@@ -1,4 +1,5 @@
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Field, Relationship
+from typing import Optional
 import datetime as dt
 
 class Enum(SQLModel):
@@ -26,6 +27,9 @@ class User(SQLModel, table=True):
     role_id: int | None = Field(default=None, foreign_key='role.id')
     group_id: int | None = Field(default=None, foreign_key='group.id')
 
+    role: Optional[Role] = Relationship()
+    group: Optional[Group] = Relationship()
+
 class Lesson(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     schedule_id: int = Field(foreign_key='schedule.id')
@@ -36,6 +40,11 @@ class Lesson(SQLModel, table=True):
     date: dt.date
     time_start: dt.time
     time_end: dt.time
+
+    group: Optional[Group] = Relationship()
+    subject: Optional[Subject] = Relationship()
+    teacher: Optional[User] = Relationship()
+    classroom: Optional[Classroom] = Relationship()
 
 class Homework(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
@@ -59,3 +68,6 @@ class Mark(SQLModel, table=True):
     student_id: int = Field(foreign_key='user.id')
     value_id: int = Field(foreign_key='markvalue.id')
     date: dt.date
+
+    lesson: Optional[Lesson] = Relationship()
+    value: Optional[MarkValue] = Relationship()
