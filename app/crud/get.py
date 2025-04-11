@@ -14,10 +14,8 @@ def get_group(session: Session, group_id: int) -> Group:
     return session.get(Group, group_id)
 
 def get_student(session: Session, student_id: int) -> User:
-    role = session.exec(select(Role).where(Role.name == 'student')).first()
-    statement = select(User)\
-                .where(User.id == student_id)\
-                .where(User.role_id == role.id)
+    role_id = session.exec(select(Role.id).where(Role.name == 'student')).first()
+    statement = select(User).where(User.id == student_id).where(User.role_id == role_id)
     result = session.exec(statement).first()
     return result
 
@@ -41,8 +39,8 @@ def get_student_homework(
     from_: date | None = None,
     to: date | None = None
 ) -> List[Homework]:
-    role_id = session.exec(select(Role).where(Role.name == 'student')).first().id
-    user = session.exec(select(User).where((User.id == student_id) & (User.role_id == role_id))).first()
+    role_id = session.exec(select(Role.id).where(Role.name == 'student')).first()
+    user = session.exec(select(User).where(User.id == student_id, User.role_id == role_id)).first()
     if not user: return None
     statement = select(Homework).join(Lesson).where(Lesson.group_id == user.group_id)
     if from_:
@@ -53,8 +51,8 @@ def get_student_homework(
     return result
 
 def get_student_schedule(session: Session, student_id: int) -> List[Schedule]:
-    role_id = session.exec(select(Role).where(Role.name == 'student')).first().id
-    user = session.exec(select(User).where((User.id == student_id) & (User.role_id == role_id))).first()
+    role_id = session.exec(select(Role.id).where(Role.name == 'student')).first()
+    user = session.exec(select(User).where(User.id == student_id, User.role_id == role_id)).first()
     if not user: return None
     statement = select(Schedule).join(Group).where(Group.id == user.group_id)
     result = session.exec(statement).all()
@@ -99,7 +97,8 @@ def get_student_schedule_full(
     return result
 
 def get_teacher(session: Session, teacher_id: int) -> User:
-    statement = select(User).where(User.id == teacher_id).where(User.role_id == 2)
+    role_id = session.exec(select(Role.id).where(Role.name == 'teacher')).first()
+    statement = select(User).where(User.id == teacher_id).where(User.role_id == role_id)
     result = session.exec(statement).first()
     return result
 
@@ -173,15 +172,16 @@ def get_teacher_marks(
     from_: date | None = None,
     to: date | None = None
 ) -> List[Mark]:
-    role_id = session.exec(select(Role).where(Role.name == 'teacher')).first().id
-    user = session.exec(select(User).where((User.id == teacher_id) & User.role_id == role_id)).first()
+    role_id = session.exec(select(Role.id).where(Role.name == 'teacher')).first()
+    user = session.exec(select(User).where(User.id == teacher_id, User.role_id == role_id)).first()
     if not user: return None
-    lesson = session.exec(select(Lesson).where(Lesson.teacher_id == user.id)).first()
+    lesson = select(Lesson.id).where(Lesson.teacher_id == user.id)
     if from_:
         lesson = lesson.filter(Lesson.date >= from_)
     if to:
         lesson = lesson.filter(Lesson.date <= to)
-    statement = select(Mark).where(Mark.lesson_id == lesson.id)
+    lesson = session.exec(lesson).all()
+    statement = select(Mark).where(Mark.lesson_id.in_(lesson))
     result = session.exec(statement).all()
     return result
 
@@ -288,8 +288,8 @@ def get_schedule(
 ) -> List[Schedule]:
     statement = select(Schedule)
     if group:
-        group_id = session.exec(select(Group).where(Group.name == group)).first().id
-        statement = statement.filter(Schedule.group_id == group_id)
+        group_id = session.exec(select(Group.id).where(Group.name == group)).first()
+        statement = statement.filter(Schedule.group_id.in_(group_id))
     if teacher:
         statement = statement.filter(Schedule.teacher_id == teacher)
     if from_:
@@ -316,12 +316,12 @@ def get_marks(
     if student:
         statement = statement.filter(Mark.student_id == student)
     if group:
-        group_id = session.exec(select(Group).where(Group.name == group)).first().id
+        group_id = session.exec(select(Group.id).where(Group.name == group)).first()
         lessons = session.exec(select(Lesson.id).where(Lesson.group_id == group_id)).all()
-        statement = statement.filter(Homework.lesson_id.in_(lessons))
+        statement = statement.filter(Mark.lesson_id.in_(lessons))
     if subject:
-        subject_id = session.exec(select(Subject).where(Subject.name == subject)).first().id
-        lessons = session.exec(select(Lesson).where(Lesson.subject_id == subject_id)).all()
+        subject_id = session.exec(select(Subject.id).where(Subject.name == subject)).first()
+        lessons = session.exec(select(Lesson.id).where(Lesson.subject_id == subject_id)).all()
         statement = statement.filter(Mark.lesson_id.in_(lessons))
     if from_:
         statement = statement.filter(Mark.date >= from_)
@@ -344,7 +344,7 @@ def get_lessons(
 ) -> List[Lesson]:
     statement = select(Lesson)
     if group:
-        group_id = session.exec(select(Group).where(Group.name == group)).first().id
+        group_id = session.exec(select(Group.id).where(Group.name == group)).first()
         statement = statement.filter(Lesson.group_id == group_id)
     if teacher:
         statement = statement.filter(Lesson.teacher_id == teacher)
@@ -370,11 +370,11 @@ def get_homeworks(
 ) -> List[Homework]:
     statement = select(Homework)
     if student:
-        group_id = session.exec(select(User).where(User.id == student)).first().group_id
+        group_id = session.exec(select(User.group_id).where(User.id == student)).first()
         lessons = session.exec(select(Lesson.id).where(Lesson.group_id == group_id)).all()
         statement = statement.filter(Homework.lesson_id.in_(lessons))
     if group:
-        group_id = session.exec(select(Group).where(Group.name == group)).first().id
+        group_id = session.exec(select(Group.id).where(Group.name == group)).first()
         lessons = session.exec(select(Lesson.id).where(Lesson.group_id == group_id)).all()
         statement = statement.filter(Homework.lesson_id.in_(lessons))
     if teacher:
