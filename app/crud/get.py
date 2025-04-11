@@ -289,7 +289,7 @@ def get_schedule(
     statement = select(Schedule)
     if group:
         group_id = session.exec(select(Group.id).where(Group.name == group)).first()
-        statement = statement.filter(Schedule.group_id.in_(group_id))
+        statement = statement.filter(Schedule.group_id == group_id)
     if teacher:
         statement = statement.filter(Schedule.teacher_id == teacher)
     if from_:
