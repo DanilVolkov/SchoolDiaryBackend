@@ -37,3 +37,17 @@ def get_current_user(session: SessionDep, token: TokenDep) -> User:
     return user
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
+
+def RequireRole(*roles: str):
+    def role_checker(user: CurrentUser):
+        adm_roles = ('admin', *roles)
+        if user.role.name not in adm_roles:
+            raise HTTPException(
+                status_code=403,
+                detail=f'Access denied for role \'{user.role.name}\', requires: [{', '.join(adm_roles)}]',
+            )
+        return user
+    return Depends(role_checker)
+
+def RequireRoleDep(*roles: str) -> Annotated[User, Depends]:
+    return Annotated[User, Depends(RequireRole(*roles).dependency)]

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Query, HTTPException
 
 from app import crud
-from app.api.deps import SessionDep
+from app.api.deps import SessionDep, CurrentUser, RequireRole
 from app.schemas.student import StudentPublic, StudentMarks
 from app.schemas.homework import HomeworkPublic
 from app.schemas.schedule import StudentSchedule
@@ -10,17 +10,29 @@ from app.helpers.path import ID
 
 router = APIRouter(
     prefix='/students',
-    tags=['students']
+    tags=['students'],
+    dependencies=[RequireRole('student')]
 )
 
 @router.get(
-    '/{id}',
+    '/me',
     summary="Получить текущего ученика",
     description="Возвращает информацию о текущем аутентифицированном ученике.",
 )
 def get_current_student(
     session: SessionDep,
-    id: int
+    student: CurrentUser
+) -> StudentPublic:
+    return get_student(session, student.id)
+
+@router.get(
+    '/{id}',
+    summary="Получить ученика по ID",
+    description="Возвращает информацию об ученике по его идентификатору.",
+)
+def get_student(
+    session: SessionDep,
+    id: int = ID('ученика (пользователя)')
 ) -> StudentPublic: 
     student = crud.get_student(session, id)
     if student is None:

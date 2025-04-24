@@ -1,27 +1,38 @@
-from fastapi import APIRouter, Path, Query, HTTPException
+from fastapi import APIRouter, Query, HTTPException
 
 from app import crud
-from app.api.deps import SessionDep
+from app.api.deps import SessionDep, CurrentUser, RequireRole
 from app.schemas.teacher import TeacherPublic, TeacherMarks
 from app.schemas.homework import HomeworkPublic
-from app.schemas.mark import MarkPublic
 from app.schemas.schedule import SchedulePublic
 
 from app.helpers.path import ID
 
 router = APIRouter(
     prefix='/teachers',
-    tags=['teachers']
+    tags=['teachers'],
+    dependencies=[RequireRole('teacher')]
 )
 
 @router.get(
-    '/{id}',
+    '/me',
     summary="Получить текущего учителя",
     description="Возвращает информацию о текущем аутентифицированном учителе.",
 )
 def get_current_teacher(
     session: SessionDep,
-    id: int
+    teacher: CurrentUser
+) -> TeacherPublic:
+    return get_teacher(session, teacher.id)
+
+@router.get(
+    '/{id}',
+    summary="Получить учителя по ID",
+    description="Возвращает информацию об учителе по его идентификатору.",
+)
+def get_teacher(
+    session: SessionDep,
+    id: int = ID('учителя (пользователя)')
 ) -> TeacherPublic:
     teacher = crud.get_teacher(session, id)
     if teacher is None:
