@@ -1,6 +1,8 @@
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, HTTPException
 
-from app.schemas.user import UserBase, UserUpdate, UserPublic
+from app import crud
+from app.api.deps import SessionDep, RequireRoleDep
+from app.schemas.user import UserCreate, UserUpdate, UserPublic
 from app.helpers.path import ID
 
 router = APIRouter(
@@ -13,7 +15,12 @@ router = APIRouter(
     summary="Получить список пользователей",
     description="Возвращает список всех пользователей.",
 )
-def get_users() -> list[UserPublic]: return
+def get_users(
+    session: SessionDep,
+    skip: int = 0,
+    limit: int = 100
+) -> list[UserPublic]:
+    return crud.get_users(session, skip, limit)
 
 @router.post(
     '/',
@@ -21,8 +28,11 @@ def get_users() -> list[UserPublic]: return
     description="Создает нового пользователя.",
 )
 def create_user(
-    body: UserBase = Body(..., description="Данные нового пользователя")
-) -> UserPublic: return
+    session: SessionDep,
+    admin: RequireRoleDep('admin'),
+    u: UserCreate = Body(..., description="Данные нового пользователя")
+) -> UserPublic:
+    return crud.create_user(session, u)
 
 @router.get(
     '/{id}',
@@ -30,8 +40,16 @@ def create_user(
     description="Возвращает информацию о пользователе по его идентификатору.",
 )
 def get_user(
+    session: SessionDep,
     id: int = ID('пользователя')
-) -> UserPublic: return
+) -> UserPublic:
+    user = crud.get_user(session, id)
+    if user is None:
+        raise HTTPException(
+            status_code=404,
+            detail='User not found'
+        )
+    return user
 
 @router.put(
     '/{id}',
@@ -39,9 +57,18 @@ def get_user(
     description="Обновляет информацию о пользователе по его идентификатору.",
 )
 def update_user(
+    session: SessionDep,
+    admin: RequireRoleDep('admin'),
     id: int = ID('пользователя'),
     u: UserUpdate = Body(..., description="Данные для обновления пользователя")
-) -> UserPublic: return
+) -> UserPublic:
+    user = crud.update_user(session, id, u)
+    if user is None:
+        raise HTTPException(
+            status_code=404,
+            detail='User not found'
+        )
+    return user
 
 @router.delete(
     '/{id}',
@@ -49,5 +76,7 @@ def update_user(
     description="Удаляет пользователя по его идентификатору.",
 )
 def delete_user(
+    session: SessionDep,
+    admin: RequireRoleDep('admin'),
     id: int = ID('пользователя')
-) -> UserPublic: return
+): return crud.delete_user(session, id)
