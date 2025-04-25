@@ -1,0 +1,9 @@
+[tool.black]
+line-length = 90
+target-version = ['py312']
+
+[tool.isort]
+profile = "black"
+line_length = 90
+known_first_party = ["app"]
+combine_as_imports = true
